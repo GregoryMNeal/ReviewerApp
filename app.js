@@ -33,13 +33,47 @@ app.get('/search', function (req, resp, next) {
 // Display details for a restaurant
 app.get('/restaurant/:id', function (req, resp, next) {
   var restaurant_id = req.params.id;
-  var q = 'SELECT * from restaurant WHERE id = $1';
-  db.one(q, restaurant_id)
+  var q = 'SELECT * from review \
+    JOIN restaurant ON restaurant.id = restaurant_id \
+    LEFT OUTER JOIN reviewer ON reviewer.id = reviewer_id \
+    WHERE restaurant_id = $1';
+  db.any(q, restaurant_id)
     .then(function (result) {
       var context = {title: 'Restaurant Details', result: result};
       resp.render('restaurant.hbs', context);
     })
     .catch(next);
+});
+
+// get method for adding a review
+app.get('/addreview', function (req, resp) {
+  var id = req.query.id;
+  var context = {title: 'Add Restaurant Review', id: id};
+  resp.render('addreview.hbs', context);
+});
+
+// post method for adding a review
+app.post('/addreview', function (req, resp, next) {
+    // Get input from form
+  var form_restaurant_id = req.body.id;
+  var form_title = req.body.review_title;
+  var form_review = req.body.review_text;
+  var form_stars = parseInt(req.body.review_stars);
+  var review_info = {
+    stars: form_stars,
+    title: form_title,
+    review: form_review,
+    restaurant_id: form_restaurant_id
+  };
+  var q = 'INSERT INTO review \
+    VALUES (default, ${stars}, ${title}, ${review}, default, ${restaurant_id}) RETURNING id';
+    db.one(q, review_info)
+      .then(function (result) {
+        console.log('Created review with ID ' + result.id);
+        // redirect to display all to-do's
+        resp.redirect('/');
+      })
+      .catch(next);
 });
 
 // Listen for requests

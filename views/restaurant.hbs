@@ -1,5 +1,13 @@
-<h2>Restaurant Details:</h2>
-<br>
-<p>Name: {{result.name}}</p>
-<p>Address: {{result.address}}</p>
-<p>Category: {{result.category}}</p>
+<form action="/addreview" method="GET">
+  <input type="hidden" name="id" value={{result.[0].restaurant_id}}>
+  <h2>Restaurant Details:</h2>
+  <p>Name: {{result.[0].name}}</p>
+  <p>Address: {{result.[0].address}}</p>
+  <p>Category: {{result.[0].category}}</p>
+  <button type="submit">Add Review</button>
+  <br>
+  <br>
+  {{#each result}}
+      <li>Stars: {{stars}} Title: {{title}} Review: {{review}} Reviewer Name: {{reviewer_name}} Reviewer Email: {{email}}</li>
+  {{/each}}
+</form>
