@@ -1,12 +1,12 @@
 <form action="/addreview" method="POST">
   <input type="hidden" name="id" value={{id}}>
-  Title:
+  <b>Title:</b>
   <br>
   <input type="text" name="review_title" placeholder="Title"><br><br>
-  Write a review:
+  <b>Write a review:</b>
   <br>
-  <input type="text" name="review_text" placeholder="Write a review..."><br><br>
-  Stars:
+  <textarea type="text" name="review_text" rows="8" cols="100"></textarea><br><br>
+  <b>Stars:</b>
   <br>
   <input type="radio" name="review_stars" value="1"> One<br>
   <input type="radio" name="review_stars" value="2"> Two<br>

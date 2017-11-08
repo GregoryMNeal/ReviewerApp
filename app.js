@@ -12,7 +12,7 @@ const body_parser = require('body-parser');
 app.use(body_parser.urlencoded({extended: false}));
 
 // get method for root URL:/
-app.get('/', function (req, resp) {
+app.get('/', function (req, resp, next) {
   var context = {title: 'Restaurant Review'};
   resp.render('index.hbs', context);
 });
@@ -30,13 +30,42 @@ app.get('/search', function (req, resp, next) {
     .catch(next);
 });
 
+// get method for adding a restaurant
+app.get('/restaurant/new', function (req, resp, next) {
+  var context = {title: 'Add Restaurant'};
+  resp.render('addrestaurant.hbs', context);
+});
+
+// post method for adding a restaurant
+app.post('/restaurant/submit_new', function (req, resp, next) {
+  // Get input from form
+  var form_restaurant_name = req.body.restaurant_name;
+  var form_address = req.body.restaurant_addr;
+  var form_category = req.body.restaurant_cat;
+  var restaurant_info = {
+    name: form_restaurant_name,
+    address: form_address,
+    category: form_category
+  };
+  var q = 'INSERT INTO restaurant \
+    VALUES (default, ${name}, ${address}, ${category}) RETURNING id';
+    db.one(q, restaurant_info)
+      .then(function (result) {
+        console.log('Created restaurant with ID ' + result.id);
+        // redirect to display restaurant details
+        resp.redirect('/restaurant/' + result.id);
+      })
+      .catch(next);
+});
+
 // Display details for a restaurant
 app.get('/restaurant/:id', function (req, resp, next) {
   var restaurant_id = req.params.id;
-  var q = 'SELECT * from review \
-    JOIN restaurant ON restaurant.id = restaurant_id \
-    LEFT OUTER JOIN reviewer ON reviewer.id = reviewer_id \
-    WHERE restaurant_id = $1';
+  var q = 'SELECT * from restaurant \
+    LEFT OUTER JOIN review ON restaurant.id = review.restaurant_id \
+    LEFT OUTER JOIN reviewer ON reviewer.id = review.reviewer_id \
+    WHERE restaurant.id = $1';
+    console.log(restaurant_id);
   db.any(q, restaurant_id)
     .then(function (result) {
       var context = {title: 'Restaurant Details', result: result};
@@ -46,8 +75,9 @@ app.get('/restaurant/:id', function (req, resp, next) {
 });
 
 // get method for adding a review
-app.get('/addreview', function (req, resp) {
-  var id = req.query.id;
+app.get('/addreview', function (req, resp, next) {
+  var id = req.query.id;;
+  console.log("The ID is:" + id);
   var context = {title: 'Add Restaurant Review', id: id};
   resp.render('addreview.hbs', context);
 });
@@ -71,7 +101,7 @@ app.post('/addreview', function (req, resp, next) {
       .then(function (result) {
         console.log('Created review with ID ' + result.id);
         // redirect to display all to-do's
-        resp.redirect('/');
+        resp.redirect('/restaurant/' + form_restaurant_id);
       })
       .catch(next);
 });
