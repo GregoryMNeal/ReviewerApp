@@ -1,0 +1,28 @@
+{
+  "name": "reviewerapp",
+  "version": "1.0.0",
+  "description": "Express App to simulate restaurant reviews",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HarleyGeek/ReviewerApp.git"
+  },
+  "author": "Greg Neal",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/HarleyGeek/ReviewerApp/issues"
+  },
+  "homepage": "https://github.com/HarleyGeek/ReviewerApp#readme",
+  "devDependencies": {
+    "nodemon": "^1.12.1"
+  },
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2",
+    "hbs": "^4.0.1",
+    "pg-promise": "^7.3.1"
+  }
+}
