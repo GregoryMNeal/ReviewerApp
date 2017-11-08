@@ -17,8 +17,8 @@ app.get('/', function (req, resp) {
   resp.render('index.hbs', context);
 });
 
-// get method for search query
-app.get('/search', function (req, resp) {
+// Display list of restaurants that match search criteria
+app.get('/search', function (req, resp, next) {
   // Get query parameters from URL
   var search_criteria = req.query.searchcriteria;
   var q = "SELECT * from restaurant WHERE name ILIKE '%$1#%'";
@@ -26,8 +26,20 @@ app.get('/search', function (req, resp) {
     .then(function (result) {
       var context = {title: 'Restaurant List', result: result};
       resp.render('list.hbs', context);
+    })
     .catch(next);
-  });
+});
+
+// Display details for a restaurant
+app.get('/restaurant/:id', function (req, resp, next) {
+  var restaurant_id = req.params.id;
+  var q = 'SELECT * from restaurant WHERE id = $1';
+  db.one(q, restaurant_id)
+    .then(function (result) {
+      var context = {title: 'Restaurant Details', result: result};
+      resp.render('restaurant.hbs', context);
+    })
+    .catch(next);
 });
 
 // Listen for requests
