@@ -1,13 +1,14 @@
 <form action="/addreview" method="GET">
-  <input type="hidden" name="id" value={{result.[0].restaurant_id}}>
+  <input type="hidden" name="id" value={{results.[0].id}}>
+  <h1> ID: {{results.[0].id}}</h1>
   <h2>Restaurant Details:</h2>
-  <p>Name: {{result.[0].name}}</p>
-  <p>Address: {{result.[0].address}}</p>
-  <p>Category: {{result.[0].category}}</p>
+  <p>Name: {{results.[0].name}}</p>
+  <p>Address: {{results.[0].address}}</p>
+  <p>Category: {{results.[0].category}}</p>
   <button type="submit">Add Review</button>
   <br>
   <br>
-  {{#each result}}
-      <li><b>Stars: </b>{{stars}} <b>Title: </b>{{title}} <b>Review: </b>{{review}} <b>Reviewer Name: </b>{{reviewer_name}} <b>Reviewer Email: </b>{{email}}</li>
+  {{#each results}}
+      <li><b>Stars: </b>{{stars}} <b>Title: </b>{{title}} <b>Review: </b>{{review}} <b>Reviewer Name: </b>{{reviewer_name}} <b>Reviewer Email: </b>{{email}} <b>Karma: </b>{{karma}}</li>
   {{/each}}
 </form>

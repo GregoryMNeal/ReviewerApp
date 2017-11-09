@@ -51,7 +51,6 @@ app.post('/restaurant/submit_new', function (req, resp, next) {
     VALUES (default, ${name}, ${address}, ${category}) RETURNING id';
     db.one(q, restaurant_info)
       .then(function (result) {
-        console.log('Created restaurant with ID ' + result.id);
         // redirect to display restaurant details
         resp.redirect('/restaurant/' + result.id);
       })
@@ -60,16 +59,14 @@ app.post('/restaurant/submit_new', function (req, resp, next) {
 
 // Display details for a restaurant
 app.get('/restaurant/:id', function (req, resp, next) {
-  var restaurant_id = req.params.id;
-  var q = 'SELECT * from restaurant \
-    LEFT OUTER JOIN review ON restaurant.id = review.restaurant_id \
-    LEFT OUTER JOIN reviewer ON reviewer.id = review.reviewer_id \
-    WHERE restaurant.id = $1';
-    console.log(restaurant_id);
-  db.any(q, restaurant_id)
-    .then(function (result) {
-      var context = {title: 'Restaurant Details', result: result};
-      resp.render('restaurant.hbs', context);
+  var id = req.params.id;
+  var q = 'SELECT restaurant.id as id, restaurant.name, restaurant.address, restaurant.category, review.stars, review.title, review.review, reviewer.reviewer_name, reviewer.email, reviewer.karma FROM restaurant \
+  LEFT JOIN review ON restaurant.id = review.restaurant_id \
+  LEFT JOIN reviewer on reviewer.id = review.reviewer_id \
+  WHERE restaurant.id = $1';
+  db.any(q, id)
+    .then(function (results) {
+      resp.render('restaurant.hbs', {title: 'Restaurant', results: results});
     })
     .catch(next);
 });
@@ -77,7 +74,6 @@ app.get('/restaurant/:id', function (req, resp, next) {
 // get method for adding a review
 app.get('/addreview', function (req, resp, next) {
   var id = req.query.id;;
-  console.log("The ID is:" + id);
   var context = {title: 'Add Restaurant Review', id: id};
   resp.render('addreview.hbs', context);
 });
@@ -96,10 +92,9 @@ app.post('/addreview', function (req, resp, next) {
     restaurant_id: form_restaurant_id
   };
   var q = 'INSERT INTO review \
-    VALUES (default, ${stars}, ${title}, ${review}, default, ${restaurant_id}) RETURNING id';
+    VALUES (default, ${stars}, ${title}, ${review}, Null, ${restaurant_id}) RETURNING id';
     db.one(q, review_info)
       .then(function (result) {
-        console.log('Created review with ID ' + result.id);
         // redirect to display all to-do's
         resp.redirect('/restaurant/' + form_restaurant_id);
       })
