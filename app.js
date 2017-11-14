@@ -36,7 +36,8 @@ app.use(function (req, resp, next) {
 
 // get method for root URL:/
 app.get('/', function (req, resp, next) {
-  var context = {title: 'Restaurant Review'};
+  login_name = req.session.login_name;
+  var context = {title: 'Restaurant Review', login_name};
   resp.render('index.hbs', context);
 });
 
@@ -56,6 +57,7 @@ app.post('/login', function (req, resp, next) {
       .then(function (result) {
       if (result.pword == password) {
         req.session.user = username; // set up a user session
+        req.session.login_name = result.reviewer_name;
         resp.redirect('/')
       } else {
         resp.send("Invalid Credentials");
@@ -74,7 +76,8 @@ app.get('/search', function (req, resp, next) {
   var q = "SELECT * from restaurant WHERE name ILIKE '%$1#%'";
   db.any(q, search_criteria)
     .then(function (result) {
-      var context = {title: 'Restaurant List', result: result};
+      login_name = req.session.login_name;
+      var context = {title: 'Restaurant List', result: result, login_name};
       resp.render('list.hbs', context);
     })
     .catch(next);
@@ -118,7 +121,8 @@ app.get('/restaurant/:id', function (req, resp, next) {
   WHERE restaurant.id = $1';
   db.any(q, id)
     .then(function (results) {
-      resp.render('restaurant.hbs', {title: 'Restaurant', results: results});
+      login_name = req.session.login_name;
+      resp.render('restaurant.hbs', {title: 'Restaurant', results: results, login_name});
     })
     .catch(next);
 });
@@ -126,8 +130,9 @@ app.get('/restaurant/:id', function (req, resp, next) {
 
 // get method for adding a review
 app.get('/addreview', function (req, resp, next) {
-  var id = req.query.id;;
-  var context = {title: 'Add Restaurant Review', id: id};
+  var id = req.query.id;
+  login_name = req.session.login_name;
+  var context = {title: 'Add Restaurant Review', id: id, login_name};
   resp.render('addreview.hbs', context);
 });
 
