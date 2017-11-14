@@ -6,4 +6,8 @@
   <br>
   <input type="password" name="password" placeholder="Enter Password"><br><br>
   <button type="submit">Login</button>
+  {{#if errmsg}}
+    <br><br>
+    <b>{{errmsg}} Please try again.</b>
+  {{/if}}
 </form>

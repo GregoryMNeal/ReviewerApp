@@ -62,11 +62,11 @@ app.post('/login', function (req, resp, next) {
         req.session.login_name = result.reviewer_name;
         resp.redirect('/')
       } else {
-        resp.send("Invalid Credentials");
+        resp.render('login.hbs', {errmsg: "Incorrect password."});
       }
     })
     .catch(function (error) {
-      resp.send("Invalid Credentials");
+      resp.render('login.hbs', {errmsg: "Incorrect login."});
     });
 });
 
