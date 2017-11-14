@@ -36,8 +36,10 @@ app.use(function (req, resp, next) {
 
 // get method for root URL:/
 app.get('/', function (req, resp, next) {
-  login_name = req.session.login_name;
-  var context = {title: 'Restaurant Review', login_name};
+  var context = {
+    title: 'Restaurant Review',
+    login_name: req.session.login_name
+  };
   resp.render('index.hbs', context);
 });
 
@@ -53,7 +55,7 @@ app.post('/login', function (req, resp, next) {
   var username = req.body.username; // get user name from the form
   var password = req.body.password; // get password from the form
   var q = 'SELECT * from reviewer WHERE email = $1';
-  db.one(q, username)
+  db.one(q, username) // sanitize SQL statement
       .then(function (result) {
       if (result.pword == password) {
         req.session.user = username; // set up a user session
@@ -74,10 +76,13 @@ app.get('/search', function (req, resp, next) {
   // Get query parameters from URL
   var search_criteria = req.query.searchcriteria;
   var q = "SELECT * from restaurant WHERE name ILIKE '%$1#%'";
-  db.any(q, search_criteria)
+  db.any(q, search_criteria) // sanitize SQL statement
     .then(function (result) {
-      login_name = req.session.login_name;
-      var context = {title: 'Restaurant List', result: result, login_name};
+      var context = {
+        title: 'Restaurant List',
+        result: result,
+        login_name: req.session.login_name
+      };
       resp.render('list.hbs', context);
     })
     .catch(next);
@@ -86,7 +91,10 @@ app.get('/search', function (req, resp, next) {
 
 // get method for adding a restaurant
 app.get('/restaurant/new', function (req, resp, next) {
-  var context = {title: 'Add Restaurant'};
+  var context = {
+    title: 'Add Restaurant',
+    login_name: req.session.login_name
+  };
   resp.render('addrestaurant.hbs', context);
 });
 
@@ -121,8 +129,10 @@ app.get('/restaurant/:id', function (req, resp, next) {
   WHERE restaurant.id = $1';
   db.any(q, id)
     .then(function (results) {
-      login_name = req.session.login_name;
-      resp.render('restaurant.hbs', {title: 'Restaurant', results: results, login_name});
+      resp.render('restaurant.hbs', {
+        title: 'Restaurant',
+        results: results,
+        login_name: req.session.login_name});
     })
     .catch(next);
 });
@@ -131,8 +141,10 @@ app.get('/restaurant/:id', function (req, resp, next) {
 // get method for adding a review
 app.get('/addreview', function (req, resp, next) {
   var id = req.query.id;
-  login_name = req.session.login_name;
-  var context = {title: 'Add Restaurant Review', id: id, login_name};
+  var context = {
+    title: 'Add Restaurant Review',
+    id: id,
+    login_name: req.session.login_name};
   resp.render('addreview.hbs', context);
 });
 
