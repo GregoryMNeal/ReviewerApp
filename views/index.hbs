@@ -1,6 +1,7 @@
 <form action="/search" method="GET">
-  <b>Hi {{login_name}}!</b>
-  <br><br>
+  {{#if login_name}}
+    <div>Hi {{login_name}}!</div>
+  {{/if}}
   <b>Search for a restaurant:</b>
   <br><br>
   <input type="text" name="searchcriteria" placeholder="Enter search criteria"><br>

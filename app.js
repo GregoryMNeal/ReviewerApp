@@ -23,14 +23,14 @@ app.use(session({
   cookie: {maxAge: 60000}
 }));
 
-// route the User to the login page if they are not logged in
+// Check to see if User needs to be logged in
 app.use(function (req, resp, next) {
-  if (req.session.user) {
-    next(); // already logged in
-  } else if (req.path == '/login') {
-    next(); // already navigating to the login page
+  if (req.session.user) {  // User is already logged in
+    next();
+  } else if (req.path == '/addreview' || req.path == '/restaurant/new') {
+    resp.redirect('/login'); // route to the login page
   } else {
-    resp.redirect('/login'); // route to thelogin page
+    next(); // login not required
   }
 });
 

@@ -1,7 +1,8 @@
 <form action="/addreview" method="GET">
   <input type="hidden" name="id" value={{results.[0].id}}>
-  <b>Hi {{login_name}}!</b>
-  <br><br>
+  {{#if login_name}}
+    <div>Hi {{login_name}}!</div>
+  {{/if}}
   <h2>Restaurant Details:</h2>
   <p>Name: {{results.[0].name}}</p>
   <p>Address: {{results.[0].address}}</p>
