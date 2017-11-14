@@ -1,10 +1,16 @@
+
+{{#if login_name}}
+  <form action="/signout" method="POST">
+    <div>
+      Hi {{login_name}}!
+      <button type="submit" value="submit">Sign out</button>
+    </div>
+  </form>
+{{/if}}
 <form action="/search" method="GET">
-  {{#if login_name}}
-    <div>Hi {{login_name}}!</div>
-  {{/if}}
   <b>Search for a restaurant:</b>
   <br><br>
   <input type="text" name="searchcriteria" placeholder="Enter search criteria"><br>
   <br>
-  <button type="submit">Submit</button>
+  <button type="submit" value="submit">Search</button>
 </form>

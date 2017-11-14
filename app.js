@@ -60,6 +60,7 @@ app.post('/login', function (req, resp, next) {
       if (result.pword == password) {
         req.session.user = username; // set up a user session
         req.session.login_name = result.reviewer_name;
+        req.session.reviewer_id = result.id;
         resp.redirect('/')
       } else {
         resp.render('login.hbs', {errmsg: "Incorrect password."});
@@ -159,18 +160,24 @@ app.post('/addreview', function (req, resp, next) {
     stars: form_stars,
     title: form_title,
     review: form_review,
+    reviewer_id: req.session.reviewer_id,
     restaurant_id: form_restaurant_id
   };
   var q = 'INSERT INTO review \
-    VALUES (default, ${stars}, ${title}, ${review}, Null, ${restaurant_id}) RETURNING id';
+    VALUES (default, ${stars}, ${title}, ${review}, ${reviewer_id}, ${restaurant_id}) RETURNING id';
     db.one(q, review_info)
       .then(function (result) {
-        // redirect to display all to-do's
         resp.redirect('/restaurant/' + form_restaurant_id);
       })
       .catch(next);
 });
 
+// get method for signout
+app.post('/signout', function (req, resp, next) {
+  req.session.destroy(function (err) {
+  });
+  resp.redirect('/');
+});
 
 // Listen for requests
 app.listen(8000, function() {

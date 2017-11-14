@@ -1,6 +1,13 @@
+{{#if login_name}}
+  <form action="/signout" method="POST">
+    <div>
+      Hi {{login_name}}!
+      <button type="submit" value="submit">Sign out</button>
+    </div>
+  </form>
+{{/if}}
 <form action="/addreview" method="POST">
   <input type="hidden" name="id" value="{{id}}">
-  <div>Hi {{login_name}}!</div>
   <b>Title:</b>
   <br>
   <input type="text" name="review_title" placeholder="Title"><br><br>

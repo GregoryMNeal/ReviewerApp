@@ -1,8 +1,12 @@
 {{#if login_name}}
-  <div>Hi {{login_name}}!</div>
+  <form action="/signout" method="POST">
+    <div>
+      Hi {{login_name}}!
+      <button type="submit" value="submit">Sign out</button>
+    </div>
+  </form>
 {{/if}}
 <h2>Here are the restaurant's that match your search criteria:</h2>
-<br>
 <ul>
   {{#each result}}
       <li><a href="/restaurant/{{id}}">{{name}}</a></li>

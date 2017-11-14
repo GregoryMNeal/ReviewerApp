@@ -1,7 +1,12 @@
+{{#if login_name}}
+  <form action="/signout" method="POST">
+    <div>
+      Hi {{login_name}}!
+      <button type="submit" value="submit">Sign out</button>
+    </div>
+  </form>
+{{/if}}
 <form action="/restaurant/submit_new" method="POST">
-  {{#if login_name}}
-    <div>Hi {{login_name}}!</div>
-  {{/if}}
   <b>Name of restaurant:</b>
   <br>
   <input type="text" name="restaurant_name" placeholder="Restaurant name"><br><br>
