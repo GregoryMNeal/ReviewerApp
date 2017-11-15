@@ -27,7 +27,8 @@ app.use(session({
 app.use(function (req, resp, next) {
   if (req.session.user) {  // User is already logged in
     next();
-  } else if (req.path == '/addreview' || req.path == '/restaurant/new') {
+  } else if (req.path == '/addreview' || req.path == '/restaurant/new') { // intercept and require login
+    req.session.destination = req.originalUrl; // save intended destination
     resp.redirect('/login'); // route to the login page
   } else {
     next(); // login not required
@@ -61,7 +62,7 @@ app.post('/login', function (req, resp, next) {
         req.session.user = username; // set up a user session
         req.session.login_name = result.reviewer_name;
         req.session.reviewer_id = result.id;
-        resp.redirect('/')
+        resp.redirect(req.session.destination);
       } else {
         resp.render('login.hbs', {errmsg: "Incorrect password."});
       }
