@@ -73,6 +73,50 @@ app.post('/login', function (req, resp, next) {
 });
 
 
+// get method for account creation form
+app.get('/create_acct', function (req, resp, next) {
+  var context = {title: 'Create Account',
+    name: '',
+    email: '',
+    errmsg: ''
+  };
+  resp.render('createacct.hbs', context);
+});
+
+// post method for account creation form
+app.post('/create_acct', function (req, resp, next) {
+  // Get input from form
+  var form_name = req.body.name;
+  var form_email = req.body.email;
+  var form_password = req.body.password;
+  var form_confirmpwd = req.body.confirmpwd;
+  if (form_password != form_confirmpwd) {
+    console.log(form_name);
+    var context = {title: 'Create Account',
+      name: form_name,
+      email: form_email,
+      errmsg: 'Passwords do not match.'};
+    resp.render('createacct.hbs', context);
+  } else {
+    var reviewer_info = {
+      name: form_name,
+      email: form_email,
+      password: form_password
+    };
+    var q = 'INSERT INTO reviewer \
+      VALUES (default, ${name}, ${email}, NULL, ${password}) RETURNING id';
+    db.one(q, reviewer_info)
+      .then(function (result) {
+        req.session.user = form_email; // set up a user session
+        req.session.login_name = form_name;
+        req.session.reviewer_id = result.id;
+        // redirect to home page
+        resp.redirect('/');
+      })
+      .catch(next);
+  }
+});
+
 // Display list of restaurants that match search criteria
 app.get('/search', function (req, resp, next) {
   // Get query parameters from URL

@@ -1,13 +1,16 @@
 <form action="/login" method="POST">
   <b>Username</b>
   <br>
-  <input type="text" name="username" placeholder="Enter Username"><br><br>
+  <input type="text" name="username" placeholder="Email address"><br><br>
   <b>Password</b>
   <br>
   <input type="password" name="password" placeholder="Enter Password"><br><br>
-  <button type="submit">Login</button>
+  <button type="submit">Login</button><br><br>
   {{#if errmsg}}
     <br><br>
     <b>{{errmsg}} Please try again.</b>
   {{/if}}
+</form>
+<form action="/create_acct" method="GET">
+  <button type="submit">Create Account</button>
 </form>
