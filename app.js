@@ -6,9 +6,11 @@ var app = express(); // make the app
 var session = require('express-session'); // used for user login
 var pgp = require('pg-promise')({
   // initialization options
-}); // for accessing the database
-var db = pgp({database: 'restaurant'}); // also for accessing the database
+}); // used for accessing the database
+var db = pgp({database: 'restaurant'}); // also used for accessing the database
 var body_parser = require('body-parser'); // used to retrieve input from HTML forms
+var pbkdf2 = require('pbkdf2'); // used to encrypt password
+var crypto = require('crypto'); // used to encrypt password
 
 // Application setup
 app.set('view engine', 'hbs'); // use handlebars for template rendering
@@ -23,15 +25,15 @@ app.use(session({
   cookie: {maxAge: 60000}
 }));
 
-// Check to see if User needs to be logged in
+// Check to see if user needs to be logged in
 app.use(function (req, resp, next) {
-  if (req.session.user) {  // User is already logged in
+  if (req.session.user) {  // user is already logged in
     next();
-  } else if (req.path == '/addreview' || req.path == '/restaurant/new') { // intercept and require login
-    req.session.destination = req.originalUrl; // save intended destination
-    resp.redirect('/login'); // route to the login page
+  } else if (req.path == '/addreview' || req.path == '/restaurant/new') { // require login
+      req.session.destination = req.originalUrl; // save intended destination
+      resp.redirect('/login');
   } else {
-    next(); // login not required
+      next(); // login not required
   }
 });
 
@@ -44,10 +46,12 @@ app.get('/', function (req, resp, next) {
   resp.render('index.hbs', context);
 });
 
-
 // get method for login
 app.get('/login', function (req, resp, next) {
-  var context = {title: 'Login'};
+  var context = {title: 'Login',
+    uname: '',
+    errmsg: ''
+  };
   resp.render('login.hbs', context);
 });
 
@@ -57,21 +61,39 @@ app.post('/login', function (req, resp, next) {
   var password = req.body.password; // get password from the form
   var q = 'SELECT * from reviewer WHERE email = $1';
   db.one(q, username) // sanitize SQL statement
-      .then(function (result) {
-      if (result.pword == password) {
+    .then(function (result) {
+      // validate password
+      var db_pwd = result.pword;
+      var pwd_parts = db_pwd.split('$');
+      var key = pbkdf2.pbkdf2Sync(
+        password,
+        pwd_parts[2],
+        parseInt(pwd_parts[1]),
+        256,
+        'sha256'
+      );
+      var hash = key.toString('hex');
+      if (hash === pwd_parts[3]) {
         req.session.user = username; // set up a user session
         req.session.login_name = result.reviewer_name;
         req.session.reviewer_id = result.id;
         resp.redirect(req.session.destination);
       } else {
-        resp.render('login.hbs', {errmsg: "Incorrect password."});
+        var context = {title: 'Login',
+          uname: username,
+          errmsg: 'Incorrect password.'
+        };
+        resp.render('login.hbs', context);
       }
     })
     .catch(function (error) {
-      resp.render('login.hbs', {errmsg: "Incorrect login."});
+      var context = {title: 'Login',
+        uname: username,
+        errmsg: 'Incorrect login.'
+      };
+      resp.render('login.hbs', context);
     });
 });
-
 
 // get method for account creation form
 app.get('/create_acct', function (req, resp, next) {
@@ -91,17 +113,21 @@ app.post('/create_acct', function (req, resp, next) {
   var form_password = req.body.password;
   var form_confirmpwd = req.body.confirmpwd;
   if (form_password != form_confirmpwd) {
-    console.log(form_name);
     var context = {title: 'Create Account',
       name: form_name,
       email: form_email,
       errmsg: 'Passwords do not match.'};
     resp.render('createacct.hbs', context);
   } else {
+    var salt = crypto.randomBytes(20).toString('hex');
+    var pwd = form_password;
+    var key = pbkdf2.pbkdf2Sync(pwd, salt, 36000, 256, 'sha256');
+    var hash = key.toString('hex');
+    var encrypted_pwd = `pbkdf2_sha256$36000$${salt}$${hash}`;
     var reviewer_info = {
       name: form_name,
       email: form_email,
-      password: form_password
+      password: encrypted_pwd
     };
     var q = 'INSERT INTO reviewer \
       VALUES (default, ${name}, ${email}, NULL, ${password}) RETURNING id';
@@ -134,7 +160,6 @@ app.get('/search', function (req, resp, next) {
     .catch(next);
 });
 
-
 // get method for adding a restaurant
 app.get('/restaurant/new', function (req, resp, next) {
   var context = {
@@ -165,7 +190,6 @@ app.post('/restaurant/submit_new', function (req, resp, next) {
       .catch(next);
 });
 
-
 // Display details for a restaurant
 app.get('/restaurant/:id', function (req, resp, next) {
   var id = req.params.id;
@@ -183,7 +207,6 @@ app.get('/restaurant/:id', function (req, resp, next) {
     .catch(next);
 });
 
-
 // get method for adding a review
 app.get('/addreview', function (req, resp, next) {
   var id = req.query.id;
@@ -196,7 +219,7 @@ app.get('/addreview', function (req, resp, next) {
 
 // post method for adding a review
 app.post('/addreview', function (req, resp, next) {
-    // Get input from form
+  // Get input from form
   var form_restaurant_id = req.body.id;
   var form_title = req.body.review_title;
   var form_review = req.body.review_text;
